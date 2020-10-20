@@ -142,7 +142,8 @@ class Home extends StatelessWidget {
                                 ),
                                 onPressed: () {
                                   // Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpPage()));
-                                  Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) =>  emplo()));
+                                 
+                                  Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) =>  EmployeePage()));
                                   //signup screen
                                 },
                               ),
