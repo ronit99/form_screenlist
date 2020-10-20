@@ -34,6 +34,9 @@ dependencies:
   email_validator: '^1.0.5'
   loadmore: ^1.0.4
   fluttertoast: ^3.1.0
+  dio: ^3.0.10
+  shared_preferences: ^0.5.12+2
+  progress_dialog: ^1.2.4
 
 
 dev_dependencies:

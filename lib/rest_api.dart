@@ -15,9 +15,19 @@ Future loginUser(String email,String password) async
   var convertedDataToJson = jsonDecode(response.body);
   return convertedDataToJson;
 }
-Future Listdash(String email,String password) async
+Future RegUser(String email,String password) async
 {
-  String urls = URLS.BASE_URL +  'api/api/users?page=1';
+  String urls = URLS.BASE_URL +  'api/register';
+  final response = await http.post(urls,
+      headers:{'Accept': 'Application/json'},
+      body: {'email': email,'password': password}
+  );
+  var convertedDataToJson = jsonDecode(response.body);
+  return convertedDataToJson;
+}
+Future listdash(String email,String password) async
+{
+  String urls = URLS.BASE_URL +  'api/api/users?page=2';
   final response = await http.post(urls,
       headers:{'Accept': 'Application/json'},
       body: {}

@@ -10,12 +10,10 @@ import 'package:email_validator/email_validator.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'rest_api.dart';
 import 'DashboardList.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 
 
-
-
-import 'splashScreen.dart';
-// import 'package:form_screenlist/';
 
 bool _showAppbar = false;
 bool _ismenselected = true;
@@ -25,6 +23,14 @@ Gender character = Gender.Male;
 void main() => runApp(MaterialApp(
   home: Home(),
 ));
+
+// Future<void> main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   SharedPreferences prefs = await SharedPreferences.getInstance();
+//   bool login = prefs.getBool("login");
+//   print("login:" + login.toString());
+//   runApp(MaterialApp(home: login == null ? Home(title: 'List') : Homedash()));
+// }
 
 class Home extends StatelessWidget {
   TextEditingController emailController = new TextEditingController();
@@ -40,7 +46,6 @@ class Home extends StatelessWidget {
       print('enter email not found');
     }
     // return 'Enter Valid Email';
-
     else
     {
       print('enter email found');
@@ -48,8 +53,11 @@ class Home extends StatelessWidget {
     // return  null;
   }
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  ProgressDialog pr;
   @override
   Widget build(BuildContext context) {
+    pr = new ProgressDialog(context, showLogs: true);
+    pr.style(message: 'Please wait...');
     return Scaffold(
       resizeToAvoidBottomPadding: false,//
       body: Stack(
@@ -148,11 +156,14 @@ class Home extends StatelessWidget {
                                   child: Image.asset("assets/right_arrow_in_a_circle.png",width: 82,height: 82,),
                                   onPressed: () async {
                                     // Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => SignUpPage()));
-
+                                    // pr.hide().then((isHidden)
+                                    // {
+                                    //   print(isHidden);
+                                    // });
+                                    pr.show();
                                     if(passwordController.text.length > 0)
                                     {
                                       _isvalid = EmailValidator.validate(emailController.text);
-
                                       if (_isvalid)
                                       {
                                         var email = emailController.text;
@@ -181,13 +192,12 @@ class Home extends StatelessWidget {
                                                       textColor: Colors.white
                                                   );
                                                   tokens = resp['token'];
+                                                  pr.hide();
                                             Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => Homedash()));
-
                                           }
                                         else
                                           {
                                             print('yes not token found');
-                                            setState(){
                                               Fluttertoast.showToast(
                                                   msg: 'Login failed due to wrong response code',
                                                   toastLength: Toast.LENGTH_SHORT,
@@ -196,7 +206,7 @@ class Home extends StatelessWidget {
                                                   backgroundColor: Colors.grey,
                                                   textColor: Colors.white
                                               );
-                                            }
+                                            pr.hide();
                                           }
                                       }
                                     }
@@ -210,6 +220,7 @@ class Home extends StatelessWidget {
                                           backgroundColor: Colors.grey,
                                           textColor: Colors.white
                                       );
+                                      pr.hide();
                                     }
                                   },
                                 ),
@@ -280,27 +291,22 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   var  countrycode = '';
-
   var  countryname = '';
   bool eng = false;
-
   bool hindi = false;
-
   bool guj = false;
-
   bool _isChecked = false;
-
   bool _isvalid = true;
 
   TextEditingController emailController = new TextEditingController();
 
   TextEditingController mobileController = new TextEditingController();
-
+  TextEditingController passwordController = new TextEditingController();
   TextEditingController dateCtl = TextEditingController();
-
   final mobnumber = TextEditingController();
-
+  var tokens = '';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  // ProgressDialog pr;
 
   String validateMobile(String value) {
 // Indian Mobile number are of 10 digit only
@@ -313,7 +319,6 @@ class _SignUpPageState extends State<SignUpPage> {
       print('enter mobile number is found');
     }
   }
-
   String validateEmail(String value) {
     Pattern pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
@@ -331,7 +336,8 @@ class _SignUpPageState extends State<SignUpPage> {
     }
     // return  null;
   }
-
+  // pr = new ProgressDialog(context, showLogs: true);
+  // pr.style(message: 'Please wait...');
   @override
   Widget build(BuildContext context) {
 
@@ -436,12 +442,14 @@ class _SignUpPageState extends State<SignUpPage> {
                         padding: EdgeInsets.fromLTRB(40, 20, 40, 0),
                         child:  TextFormField(
                           // controller: passwordController,
+                          controller: passwordController,
                           decoration: InputDecoration(
                             enabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(color: Colors.white,width: 1.0),
                             ),
                             // border: InputBorder.none,
                             labelText: 'Password',
+
                             hintStyle: TextStyle(color: Colors.white),
                             labelStyle: TextStyle(color: Colors.white),
                             focusedBorder: UnderlineInputBorder(
@@ -462,54 +470,42 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                       Container(
-                          height:  40,
-                          padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 5.0,top: 10.0),
-                          child: FlatButton.icon(
-
-                            color: Colors.transparent,
-                            label: Text(
-                              'MALE',
-                              style: new TextStyle(color: Colors.white),
-                            ),
-                            icon: Icon(Icons.radio_button_checked,color: Colors.white ),
-                            onPressed: ()
-                            {
-                              _ismenselected = true;
-                              if(character==Gender.Female)
-                              {
-                                character = Gender.Male;
-                              }
-                              else
-                              {
-
-                              }
-                              //some function
-                            },
-                          )
-                      ),
-                      Container(
-                          height:  40,
-                          padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 5.0,top: 10.0),
-                          child: FlatButton.icon(
-                            color: Colors.transparent,
-                            label: Text(
-                              'FEMALE',
-                              style: new TextStyle(color: Colors.white),
-                            ),
-                            icon: Icon(Icons.radio_button_unchecked,),
-                            onPressed: ()
-                            {
-                              {
-                                setState(()
-                                {
-                                  _ismenselected = false;
+                        // padding: new EdgeInsets.all(18.0),
+                        height:  60,
+                        padding: EdgeInsets.only(bottom: 10.0,left: 25.0,right: 10.0,top: 5.0),
+                        // alignment: Alignment.bottomLeft,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Radio(
+                              activeColor: Colors.white,
+                              focusColor: Colors.white,
+                              hoverColor: Colors.white,
+                              value: Gender.Male,
+                              groupValue: character,
+                              onChanged: (Gender value) {
+                                setState(() {
+                                  character = value;
                                 });
-                              }
-                              //some function
-                            },
-                          )
+                              },
+                            ),
+                            Text('MALE',style: TextStyle(color: Colors.white),),
+                            Radio(
+                              activeColor: Colors.white,
+                              focusColor: Colors.white,
+                              hoverColor: Colors.white,
+                              value: Gender.Female,
+                              groupValue: character,
+                              onChanged: (Gender value) {
+                                setState(() {
+                                  character = value;
+                                });
+                              },
+                            ),
+                            Text('FEMALE',style: TextStyle(color: Colors.white),),
+                          ],
+                        ),
                       ),
-
                       Container(
                         height:  50,
                         padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 10.0,top: 0.0),
@@ -517,7 +513,6 @@ class _SignUpPageState extends State<SignUpPage> {
                         child: Text(
                           'Select Language',
                           style: new TextStyle(fontSize: 20.0,color: Colors.white,fontWeight: FontWeight.bold),
-
                         ),
                       ),
 
@@ -679,15 +674,12 @@ class _SignUpPageState extends State<SignUpPage> {
                             labelStyle: TextStyle(color: Colors.white),
                           ),
                           // validator: (email)=>validateMobile(mobileController.text) != null? null:"Invalid email address",
-
                           obscureText: false,
                           autofocus: false,
                         ),
                       ),
                       Container(
-
                           height: 120,
-
                           //margin: EdgeInsets.only(bottom: 0.0),
                           // alignment: Alignment.bottomCenter ,
                           padding: EdgeInsets.only(bottom: 10.0,left: 19.0,right: 10.0,top: 35.0),
@@ -710,12 +702,66 @@ class _SignUpPageState extends State<SignUpPage> {
                                   textColor: Colors.transparent,
                                   color: Colors.white,
                                   child: Image.asset("assets/right_arrow_in_a_circle.png",width: 82,height: 82,),
-                                  onPressed: () {
-                                    // validateEmail(emailController.text);
-                                    _isvalid = EmailValidator.validate(emailController.text);
-                                    if (_isvalid)
+                                  onPressed: () async {
+                                    // pr.hide();
+                                    // Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => SignUpPage()));
+
+                                    if(mobileController.text.length > 0)
                                     {
-                                      validateEmail(emailController.text);
+                                      _isvalid = EmailValidator.validate(emailController.text);
+                                      if (_isvalid)
+                                      {
+                                        var email = emailController.text;
+                                        var password = passwordController.text;
+                                          Fluttertoast.showToast(
+                                              msg: 'Please Wait...',
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIos: 2,
+                                              backgroundColor: Colors.grey,
+                                              textColor: Colors.white
+                                          );
+                                        var resp = await RegUser(email,password);
+                                        print('resp $resp');
+                                        if(resp.containsKey('id'))
+                                        {
+                                          Fluttertoast.showToast(
+                                              msg: 'Register successfull',
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIos: 1,
+                                              backgroundColor: Colors.grey,
+                                              textColor: Colors.white
+                                          );
+                                          tokens = resp['token'];
+                                          Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => Homedash()));
+                                        }
+                                        else
+                                        {
+                                          print('yes not token found');
+                                          setState(){
+                                            Fluttertoast.showToast(
+                                                msg: 'Register failed due to wrong response code',
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                timeInSecForIos: 2,
+                                                backgroundColor: Colors.grey,
+                                                textColor: Colors.white
+                                            );
+                                          }
+                                        }
+                                      }
+                                    }
+                                    else
+                                    {
+                                      Fluttertoast.showToast(
+                                          msg: 'Please fill all fields',
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.BOTTOM,
+                                          timeInSecForIos: 1,
+                                          backgroundColor: Colors.grey,
+                                          textColor: Colors.white
+                                      );
                                     }
                                   },
                                 ),
