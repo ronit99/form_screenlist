@@ -2,12 +2,16 @@ import 'dart:ffi';
 import 'dart:ui';
 import 'dart:async';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:country_list_pick/country_list_pick.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:form_screenlist/DashList.dart';
-import 'package:loadmore/loadmore.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'rest_api.dart';
+import 'DashboardList.dart';
+
+
 
 
 import 'splashScreen.dart';
@@ -26,6 +30,7 @@ class Home extends StatelessWidget {
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
   bool _isvalid = true;
+   var tokens = '';
   String validateEmail(String value) {
     Pattern pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
@@ -42,6 +47,7 @@ class Home extends StatelessWidget {
     }
     // return  null;
   }
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,11 +100,15 @@ class Home extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.fromLTRB(40, 102, 40, 0),
                         child:  TextFormField( decoration: InputDecoration(
+
                           // contentPadding: EdgeInsets.only(),
                             hintText: 'Email'
                         ),
                           autofocus: false,
                           obscureText: false,
+                          key: _formKey,
+                          validator: validateEmail,
+                          controller: emailController,
                         ), // Example
                       ),
                       Container(
@@ -106,10 +116,11 @@ class Home extends StatelessWidget {
                         child:  TextFormField( decoration: InputDecoration(
                           // contentPadding: EdgeInsets.only(),
                             hintText: 'Password'
-
                         ),
                           autofocus: false,
                           obscureText: true,
+                          controller: passwordController,
+
                         ), // Example
                       ),
                       Container(
@@ -136,21 +147,69 @@ class Home extends StatelessWidget {
                                   color: Colors.white,
                                   child: Image.asset("assets/right_arrow_in_a_circle.png",width: 82,height: 82,),
                                   onPressed: () async {
-                                    // Navigator.push(context, MaterialPageRoute(builder: (context) => Homes()));
-
-                                    Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => SignUpPage()));
+                                    // Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => SignUpPage()));
 
                                     if(passwordController.text.length > 0)
                                     {
                                       _isvalid = EmailValidator.validate(emailController.text);
+
                                       if (_isvalid)
                                       {
-                                        validateEmail(emailController.text);
+                                        var email = emailController.text;
+                                        var password = passwordController.text;
+                                        setState(){
+                                          Fluttertoast.showToast(
+                                              msg: 'Please Wait...',
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIos: 2,
+                                              backgroundColor: Colors.grey,
+                                              textColor: Colors.white
+                                          );
+                                        }
+                                        var resp = await loginUser(email,password);
+                                        print('resp $resp');
+                                        if(resp.containsKey('token'))
+                                          {
+                                            print('yes token found');
+                                                  Fluttertoast.showToast(
+                                                      msg: 'Login successfull',
+                                                      toastLength: Toast.LENGTH_SHORT,
+                                                      gravity: ToastGravity.BOTTOM,
+                                                      timeInSecForIos: 1,
+                                                      backgroundColor: Colors.grey,
+                                                      textColor: Colors.white
+                                                  );
+                                                  tokens = resp['token'];
+                                            Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => Homedash()));
+
+                                          }
+                                        else
+                                          {
+                                            print('yes not token found');
+                                            setState(){
+                                              Fluttertoast.showToast(
+                                                  msg: 'Login failed due to wrong response code',
+                                                  toastLength: Toast.LENGTH_SHORT,
+                                                  gravity: ToastGravity.BOTTOM,
+                                                  timeInSecForIos: 2,
+                                                  backgroundColor: Colors.grey,
+                                                  textColor: Colors.white
+                                              );
+                                            }
+                                          }
                                       }
                                     }
                                     else
                                     {
-                                      print('No all fields are filled');
+                                      Fluttertoast.showToast(
+                                          msg: 'Please fill all fields',
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.BOTTOM,
+                                          timeInSecForIos: 1,
+                                          backgroundColor: Colors.grey,
+                                          textColor: Colors.white
+                                      );
                                     }
                                   },
                                 ),

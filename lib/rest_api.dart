@@ -7,8 +7,21 @@ class URLS {
 }
 Future loginUser(String email,String password) async
 {
-  String urls = URLS.BASE_URL + 'api/login';
+  String urls = URLS.BASE_URL +  'api/login';
   final response = await http.post(urls,
-  headers:{'Aceept': 'Application/json'},);
-
+  headers:{'Accept': 'Application/json'},
+  body: {'email': email,'password': password}
+  );
+  var convertedDataToJson = jsonDecode(response.body);
+  return convertedDataToJson;
+}
+Future Listdash(String email,String password) async
+{
+  String urls = URLS.BASE_URL +  'api/api/users?page=1';
+  final response = await http.post(urls,
+      headers:{'Accept': 'Application/json'},
+      body: {}
+  );
+  var convertedDataToJson = jsonDecode(response.body);
+  return convertedDataToJson;
 }
