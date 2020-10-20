@@ -31,6 +31,9 @@ dependencies:
   country_list_pick: ^1.0.1+2
   http: ^0.12.0+2
   connectivity: ^0.4.3+2
+  email_validator: '^1.0.5'
+  loadmore: ^1.0.4
+
 
 dev_dependencies:
   flutter_test:

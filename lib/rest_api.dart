@@ -8,8 +8,7 @@ class URLS {
 Future loginUser(String email,String password) async
 {
   String urls = URLS.BASE_URL + 'api/login';
-  final response = await http.post(urls
-  headers: {'Aceept': 'Application/json'},
-    body:
-  );
+  final response = await http.post(urls,
+  headers:{'Aceept': 'Application/json'},);
+
 }

@@ -1,24 +1,47 @@
 import 'dart:ffi';
 import 'dart:ui';
+import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:country_list_pick/country_list_pick.dart';
-import 'package:form_screenlist/DataList.dart';
-import 'DataList.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:form_screenlist/DashList.dart';
+import 'package:loadmore/loadmore.dart';
 
+
+import 'splashScreen.dart';
+// import 'package:form_screenlist/';
 
 bool _showAppbar = false;
 bool _ismenselected = true;
 
 enum Gender { Male, Female }
-Gender character = null;
+Gender character = Gender.Male;
 void main() => runApp(MaterialApp(
   home: Home(),
 ));
 
 class Home extends StatelessWidget {
+  TextEditingController emailController = new TextEditingController();
+  TextEditingController passwordController = new TextEditingController();
+  bool _isvalid = true;
+  String validateEmail(String value) {
+    Pattern pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regex = new RegExp(pattern);
+    if (!regex.hasMatch(value))
+    {
+      print('enter email not found');
+    }
+    // return 'Enter Valid Email';
 
-  
+    else
+    {
+      print('enter email found');
+    }
+    // return  null;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -112,11 +135,23 @@ class Home extends StatelessWidget {
                                   textColor: Colors.white,
                                   color: Colors.white,
                                   child: Image.asset("assets/right_arrow_in_a_circle.png",width: 82,height: 82,),
-                                  onPressed: () {
-                                    // Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpPage()));
-                                    Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => EmployeePage()));
-                                    // print(nameController.text);
-                                    //print(passwordController.text);
+                                  onPressed: () async {
+                                    // Navigator.push(context, MaterialPageRoute(builder: (context) => Homes()));
+
+                                    Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => SignUpPage()));
+
+                                    if(passwordController.text.length > 0)
+                                    {
+                                      _isvalid = EmailValidator.validate(emailController.text);
+                                      if (_isvalid)
+                                      {
+                                        validateEmail(emailController.text);
+                                      }
+                                    }
+                                    else
+                                    {
+                                      print('No all fields are filled');
+                                    }
                                   },
                                 ),
                               ),
@@ -142,8 +177,7 @@ class Home extends StatelessWidget {
                                 ),
                                 onPressed: () {
                                   // Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpPage()));
-                                 
-                                  Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) =>  EmployeePage()));
+                                  Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => new SignUpPage()));
                                   //signup screen
                                 },
                               ),
@@ -158,7 +192,8 @@ class Home extends StatelessWidget {
                                     color: Color.fromRGBO(78, 84, 95, 1),
                                   ),
                                 ),
-                                onPressed: () {
+                                onPressed: ()
+                                {
                                   //signup screen
                                 },
                               )
@@ -178,28 +213,66 @@ class Home extends StatelessWidget {
 }
 
 
-class SignUpPage extends StatelessWidget {
+
+class SignUpPage extends StatefulWidget {
+  @override
+  _SignUpPageState createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
   var  countrycode = '';
+
   var  countryname = '';
+  bool eng = false;
+
+  bool hindi = false;
+
+  bool guj = false;
+
+  bool _isChecked = false;
+
+  bool _isvalid = true;
+
+  TextEditingController emailController = new TextEditingController();
+
+  TextEditingController mobileController = new TextEditingController();
+
   TextEditingController dateCtl = TextEditingController();
-  final number = TextEditingController();
+
+  final mobnumber = TextEditingController();
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  String validateMobile(String value) {
+// Indian Mobile number are of 10 digit only
+    if (value.length != 10)
+    {
+      print('enter mobile number is not found');
+    }
+    else
+    {
+      print('enter mobile number is found');
+    }
+  }
+
   String validateEmail(String value) {
     Pattern pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
     RegExp regex = new RegExp(pattern);
     if (!regex.hasMatch(value))
-      return 'Enter Valid Email';
+    {
+      print('enter email not found');
+    }
+    // return 'Enter Valid Email';
+
     else
-      return  null;
+    {
+      print('enter email found');
+      validateMobile(mobileController.text);
+    }
+    // return  null;
   }
-  String validateMobile(String value) {
-// Indian Mobile number are of 10 digit only
-    if (value.length != 10)
-      return 'Mobile Number must be of 10 digit';
-    else
-      return null;
-  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -215,7 +288,6 @@ class SignUpPage extends StatelessWidget {
               child: Image(
                 image: AssetImage('assets/background_image_one_signup.png'),
                 fit: BoxFit.fill,
-
               )
             // child: B,
           ),
@@ -284,6 +356,7 @@ class SignUpPage extends StatelessWidget {
                           ),
                           key: _formKey,
                           validator: validateEmail,
+                          controller: emailController,
                           decoration: InputDecoration(
                             enabledBorder: UnderlineInputBorder(
                               borderSide: BorderSide(color: Colors.white,width: 1.0),
@@ -297,7 +370,7 @@ class SignUpPage extends StatelessWidget {
                             ),
                           ),
                           textInputAction: TextInputAction.next,
-                          // validator: (email)=>validateEmail(email)? null:"Invalid email address",
+
                         ),
                       ),
                       Container(
@@ -321,52 +394,63 @@ class SignUpPage extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        height: 55,
-                        padding: EdgeInsets.only(bottom: 10.0,left: 19.0,right: 10.0,top: 25.0),
-                        child: Row(
-                          children: <Widget>[
-                            Radio(
-
-                              activeColor: Colors.white,
-                              focusColor: Colors.white,
-                              hoverColor: Colors.white,
-                              value: Gender.Male,
-                              groupValue: character,
-                              onChanged: (Gender value) {
-
-                                setStateMale(() {
-                                  print("Radio male called");
-                                  character = Gender.Male;
-                                });
-                              },
-                            ),
-                            Text(
-                              'MALE',
-                              style: new TextStyle(fontSize: 17.0,color: Colors.white),
-                            ),
-                            Radio(
-
-                              activeColor: Colors.white,
-                              // focusColor: Colors.white,
-                              // hoverColor: Colors.white,
-                              value: Gender.Female,
-                              groupValue: character,
-                              onChanged: (Gender value) {
-
-                                setStateFemale(() {
-                                  print("Radio female called");
-                                  character = Gender.Male;
-                                });
-                              },
-                            ),
-                            Text(
-                              'FEMALE',
-                              style: new TextStyle(fontSize: 17.0,color: Colors.white),
-                            ),
-                          ],
-                          mainAxisAlignment: MainAxisAlignment.start,
+                        height:  40,
+                        padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 10.0,top: 0.0),
+                        alignment: Alignment.bottomLeft,
+                        child: Text(
+                          'Select Gender*',
+                          style: new TextStyle(fontSize: 20.0,color: Colors.white,fontWeight: FontWeight.bold),
                         ),
                       ),
+                      Container(
+                          height:  40,
+                          padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 5.0,top: 10.0),
+                          child: FlatButton.icon(
+
+                            color: Colors.transparent,
+                            label: Text(
+                              'MALE',
+                              style: new TextStyle(color: Colors.white),
+                            ),
+                            icon: Icon(Icons.radio_button_checked,color: Colors.white ),
+                            onPressed: ()
+                            {
+                              _ismenselected = true;
+                              if(character==Gender.Female)
+                              {
+                                character = Gender.Male;
+                              }
+                              else
+                              {
+
+                              }
+                              //some function
+                            },
+                          )
+                      ),
+                      Container(
+                          height:  40,
+                          padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 5.0,top: 10.0),
+                          child: FlatButton.icon(
+                            color: Colors.transparent,
+                            label: Text(
+                              'FEMALE',
+                              style: new TextStyle(color: Colors.white),
+                            ),
+                            icon: Icon(Icons.radio_button_unchecked,),
+                            onPressed: ()
+                            {
+                              {
+                                setState(()
+                                {
+                                  _ismenselected = false;
+                                });
+                              }
+                              //some function
+                            },
+                          )
+                      ),
+
                       Container(
                         height:  50,
                         padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 10.0,top: 0.0),
@@ -380,61 +464,67 @@ class SignUpPage extends StatelessWidget {
 
                       Container(
                         // padding: new EdgeInsets.all(18.0),
-                          height:  185,
-                          padding: EdgeInsets.only(bottom: 10.0,left: 30.0,right: 10.0,top: 5.0),
-                          // alignment: Alignment.bottomLeft,
-                          child: Column(
-                              children: <Widget>[
-                                // SizedBox(height: 10,),
-                                CheckboxListTile(
-                                  title: const Text(
-                                      'English',
-                                      style:  TextStyle(fontSize: 20.0,color: Colors.white)),
-                                  value: true,
-                                  onChanged: (bool value) {
-                                    setState(() {
-                                      // this.valuefirst = value;
-                                    });
-                                  },
-                                ),
-                                CheckboxListTile(
-                                  controlAffinity: ListTileControlAffinity.trailing,
-                                  title: const Text(
-                                      'Hindi',
-                                      style:  TextStyle(fontSize: 20.0,color: Colors.white)),
+                        height:  60,
+                        padding: EdgeInsets.only(bottom: 10.0,left: 25.0,right: 10.0,top: 5.0),
+                        // alignment: Alignment.bottomLeft,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Checkbox(
+                              checkColor: Colors.white,
+                              focusColor: Colors.white,
+                              hoverColor: Colors.white,
+                              //title: Text("title text"),
+                              value: eng,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  eng = newValue;
+                                });
+                              },
+                              //controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                            ),
+                            Text('English',style: TextStyle(color: Colors.white),),
+                            Checkbox(
+                              checkColor: Colors.white,
+                              focusColor: Colors.white,
+                              hoverColor: Colors.white,
+                              //title: Text("title text"),
+                              value: hindi,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  hindi = newValue;
+                                });
+                              },
+                              //controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                            ),
+                            Text('Hindi',style: TextStyle(color: Colors.white),),
+                            Checkbox(
+                              checkColor: Colors.white,
+                              focusColor: Colors.white,
+                              hoverColor: Colors.white,
+                              // title: Text("title text"),
+                              value: guj,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  guj = newValue;
+                                });
+                              },
+                              //controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                            ),
 
-                                  value: false,
-                                  onChanged: (bool value) {
-                                    setState(() {
-                                      // this.valuesecond = value;
-                                    });
-                                  },
-                                ),
-                                CheckboxListTile(
-                                  controlAffinity: ListTileControlAffinity.trailing,
-                                  title: const Text(
-                                      'Gujarati',
-                                      style:  TextStyle(fontSize: 20.0,color: Colors.white)),
-                                  value: false,
-                                  onChanged: (bool value) {
-                                    setState(() {
-                                      // this.valuesecond = value;
-                                    });
-                                  },
-                                ),
-                              ],
-                              mainAxisAlignment: MainAxisAlignment.start
-                          )
+                            Text('Gujarati',style: TextStyle(color: Colors.white),),
+                          ],
+                        ),
                       ),
                       Container(
-                          height:  30,
-                          padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 10.0,top: 0.0),
-                          alignment: Alignment.bottomLeft,
-                          child: Text(
+                        height:  30,
+                        padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 10.0,top: 0.0),
+                        alignment: Alignment.bottomLeft,
+                        child: Text(
                           'Select Country',
                           style: new TextStyle(fontSize: 20.0,color: Colors.white,fontWeight: FontWeight.bold),
-                          ),
-                          ),
+                        ),
+                      ),
 
                       Container(
                           padding:EdgeInsets.all(15),
@@ -458,8 +548,8 @@ class SignUpPage extends StatelessWidget {
                                       print(code.code); //get the country code like AQ for Antarctica
                                       print(code.dialCode); //get the country dial code +672 for Antarctica
                                       print(code.flagUri); //get the URL of flag. flags/aq.png for Antarctica
-                                     countrycode = code.code;
-                                     countryname = code.name;
+                                      countrycode = code.code;
+                                      countryname = code.name;
                                     },
                                   ),
                                 ),
@@ -476,32 +566,32 @@ class SignUpPage extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        height:  50,
-                        padding: EdgeInsets.fromLTRB(30, 15, 40, 0),
-                        child:  TextFormField(
-                          readOnly: true,
-                          controller: dateCtl,
-                          decoration: InputDecoration(
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white,width: 1.0),
+                          height:  50,
+                          padding: EdgeInsets.fromLTRB(30, 15, 40, 0),
+                          child:  TextFormField(
+                            readOnly: true,
+                            controller: dateCtl,
+                            decoration: InputDecoration(
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white,width: 1.0),
+                              ),
+                              // labelText: "Date of birth",
+                              hintText: "Select Date",
+                              // labelText: 'Mobile Number',
+                              hintStyle: TextStyle(color: Colors.white),
+                              labelStyle: TextStyle(color: Colors.white),
                             ),
-                            // labelText: "Date of birth",
-                            hintText: "Select Date",
-                            // labelText: 'Mobile Number',
-                            hintStyle: TextStyle(color: Colors.white),
-                            labelStyle: TextStyle(color: Colors.white),
-                          ),
-                          onTap: () async{
-                            DateTime date = DateTime(1900);
-                            FocusScope.of(context).requestFocus(new FocusNode());
+                            onTap: () async{
+                              DateTime date = DateTime(1900);
+                              FocusScope.of(context).requestFocus(new FocusNode());
 
-                            date = await showDatePicker(
-                                context: context,
-                                initialDate:DateTime.now(),
-                                firstDate:DateTime(1900),
-                                lastDate: DateTime(2100));
-                            dateCtl.text = "${date.day}-${date.month}-${date.year}";},
-                        )
+                              date = await showDatePicker(
+                                  context: context,
+                                  initialDate:DateTime.now(),
+                                  firstDate:DateTime(1900),
+                                  lastDate: DateTime(2100));
+                              dateCtl.text = "${date.day}-${date.month}-${date.year}";},
+                          )
                       ),
                       Container(
                         height:  50,
@@ -517,7 +607,7 @@ class SignUpPage extends StatelessWidget {
                         padding: EdgeInsets.only(bottom: 5.0,left: 30.0,right: 10.0,top: 0.0),
                         alignment: Alignment.bottomLeft,
                         child:  TextFormField(
-                          controller: number,
+                          controller: mobileController,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             enabledBorder: UnderlineInputBorder(
@@ -529,6 +619,8 @@ class SignUpPage extends StatelessWidget {
                             hintStyle: TextStyle(color: Colors.white),
                             labelStyle: TextStyle(color: Colors.white),
                           ),
+                          // validator: (email)=>validateMobile(mobileController.text) != null? null:"Invalid email address",
+
                           obscureText: false,
                           autofocus: false,
                         ),
@@ -560,14 +652,11 @@ class SignUpPage extends StatelessWidget {
                                   color: Colors.white,
                                   child: Image.asset("assets/right_arrow_in_a_circle.png",width: 82,height: 82,),
                                   onPressed: () {
-                                    if (_formKey.currentState.validate()) {
-//    If all data are correct then save data to out variables
-                                      _formKey.currentState.save();
-                                    } else {
-//    If all data are not valid then start auto validation.
-                                      setState(() {
-                                        // _autoValidate = true;
-                                      });
+                                    // validateEmail(emailController.text);
+                                    _isvalid = EmailValidator.validate(emailController.text);
+                                    if (_isvalid)
+                                    {
+                                      validateEmail(emailController.text);
                                     }
                                   },
                                 ),
@@ -612,35 +701,9 @@ class SignUpPage extends StatelessWidget {
     );
   }
 
-  void setStateMale(Null Function() param0)
-  {
-    print("Radio $character");
-    _ismenselected = true;
-    setupdategender();
-
-  }
-
-  void setStateFemale(Null Function() param0) {
-    print("Radio female called");
-    bool _ismenselected = false;
-    setupdategender();
-
-  }
-
-  void setupdategender() {
-    if (_ismenselected)
-    {
-
-    }
-    else
-    {
-
-    }
-  }
-  void setState(Null Function() param0) {
-  }
 
 }
+
 
 
 
