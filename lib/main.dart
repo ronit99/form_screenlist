@@ -10,9 +10,8 @@ import 'package:email_validator/email_validator.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'rest_api.dart';
 import 'DashboardList.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:progress_dialog/progress_dialog.dart';
-
+import 'package:connectivity/connectivity.dart';
 
 
 bool _showAppbar = false;
@@ -32,11 +31,20 @@ void main() => runApp(MaterialApp(
 //   runApp(MaterialApp(home: login == null ? Home(title: 'List') : Homedash()));
 // }
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
+
   bool _isvalid = true;
-   var tokens = '';
+
+  var tokens = '';
+
   String validateEmail(String value) {
     Pattern pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
@@ -52,8 +60,11 @@ class Home extends StatelessWidget {
     }
     // return  null;
   }
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   ProgressDialog pr;
+
   @override
   Widget build(BuildContext context) {
     pr = new ProgressDialog(context, showLogs: true);
@@ -155,11 +166,6 @@ class Home extends StatelessWidget {
                                   color: Colors.white,
                                   child: Image.asset("assets/right_arrow_in_a_circle.png",width: 82,height: 82,),
                                   onPressed: () async {
-                                    // Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => SignUpPage()));
-                                    // pr.hide().then((isHidden)
-                                    // {
-                                    //   print(isHidden);
-                                    // });
                                     pr.show();
                                     if(passwordController.text.length > 0)
                                     {
@@ -178,36 +184,58 @@ class Home extends StatelessWidget {
                                               textColor: Colors.white
                                           );
                                         }
-                                        var resp = await loginUser(email,password);
-                                        print('resp $resp');
-                                        if(resp.containsKey('token'))
+
+                                        var connectivityResult = await (Connectivity().checkConnectivity());
+                                        print(connectivityResult);
+                                        if ((connectivityResult == ConnectivityResult.mobile) && (connectivityResult == ConnectivityResult.wifi))
+                                        {
+                                          // I am connected to a mobile network.
+                                          print('connection is checked');
+                                          var resp = await loginUser(email,password);
+                                          print('resp $resp');
+                                          if(resp.containsKey('token'))
                                           {
                                             print('yes token found');
-                                                  Fluttertoast.showToast(
-                                                      msg: 'Login successfull',
-                                                      toastLength: Toast.LENGTH_SHORT,
-                                                      gravity: ToastGravity.BOTTOM,
-                                                      timeInSecForIos: 1,
-                                                      backgroundColor: Colors.grey,
-                                                      textColor: Colors.white
-                                                  );
-                                                  tokens = resp['token'];
-                                                  pr.hide();
+                                            Fluttertoast.showToast(
+                                                msg: 'Login successfull',
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                timeInSecForIos: 1,
+                                                backgroundColor: Colors.grey,
+                                                textColor: Colors.white
+                                            );
+                                            tokens = resp['token'];
+                                            pr.hide();
                                             Navigator.of(context, rootNavigator: true).pushReplacement(MaterialPageRoute(builder: (context) => Homedash()));
                                           }
-                                        else
+                                          else
                                           {
                                             print('yes not token found');
-                                              Fluttertoast.showToast(
-                                                  msg: 'Login failed due to wrong response code',
-                                                  toastLength: Toast.LENGTH_SHORT,
-                                                  gravity: ToastGravity.BOTTOM,
-                                                  timeInSecForIos: 2,
-                                                  backgroundColor: Colors.grey,
-                                                  textColor: Colors.white
-                                              );
+                                            Fluttertoast.showToast(
+                                                msg: 'Login failed due to wrong response code',
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                timeInSecForIos: 2,
+                                                backgroundColor: Colors.grey,
+                                                textColor: Colors.white
+                                            );
                                             pr.hide();
                                           }
+
+                                        }
+                                        else {
+                                          // I am not connected to the internet
+                                          Fluttertoast.showToast(
+                                              msg: 'Network is not available or connecttion is failed',
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIos: 2,
+                                              backgroundColor: Colors.red,
+                                              textColor: Colors.white
+                                          );
+                                          pr.hide();
+                                        }
+
                                       }
                                     }
                                     else
@@ -713,14 +741,14 @@ class _SignUpPageState extends State<SignUpPage> {
                                       {
                                         var email = emailController.text;
                                         var password = passwordController.text;
-                                          Fluttertoast.showToast(
-                                              msg: 'Please Wait...',
-                                              toastLength: Toast.LENGTH_SHORT,
-                                              gravity: ToastGravity.BOTTOM,
-                                              timeInSecForIos: 2,
-                                              backgroundColor: Colors.grey,
-                                              textColor: Colors.white
-                                          );
+                                        Fluttertoast.showToast(
+                                            msg: 'Please Wait...',
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            timeInSecForIos: 2,
+                                            backgroundColor: Colors.grey,
+                                            textColor: Colors.white
+                                        );
                                         var resp = await RegUser(email,password);
                                         print('resp $resp');
                                         if(resp.containsKey('id'))
@@ -805,9 +833,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
     );
   }
-
-
 }
+
+
 
 
 
