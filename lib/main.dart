@@ -724,7 +724,6 @@ class _SignUpPageState extends State<SignUpPage> {
                               ButtonTheme(
                                 minWidth:81,
                                 height: 81,
-
                                 child:RaisedButton(
                                   shape: CircleBorder(),
                                   textColor: Colors.transparent,
