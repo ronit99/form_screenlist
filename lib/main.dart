@@ -749,6 +749,10 @@ class _SignUpPageState extends State<SignUpPage> {
                                             backgroundColor: Colors.grey,
                                             textColor: Colors.white
                                         );
+                                      var connectivityResult = await (Connectivity().checkConnectivity());
+                                      print(connectivityResult);
+                                      if ((connectivityResult == ConnectivityResult.mobile) && (connectivityResult == ConnectivityResult.wifi))
+                                      {
                                         var resp = await RegUser(email,password);
                                         print('resp $resp');
                                         if(resp.containsKey('id'))
@@ -778,6 +782,18 @@ class _SignUpPageState extends State<SignUpPage> {
                                             );
                                           }
                                         }
+                                      }
+                                      else
+                                      {
+                                        Fluttertoast.showToast(
+                                            msg: 'Register failed due to no connection',
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            timeInSecForIos: 2,
+                                            backgroundColor: Colors.red,
+                                            textColor: Colors.white
+                                        );
+                                      }
                                       }
                                     }
                                     else
